@@ -1,0 +1,4 @@
+-- Project read IoT sensors through Com port on OpenWRT. Data send in JSON
+format, parse and send to remote Influx data base and stored local sqlite3 db.
+--
+# comiot
