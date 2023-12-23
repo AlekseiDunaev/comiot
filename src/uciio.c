@@ -1,6 +1,6 @@
 #include "header/uciio.h"
 
-int get_config_entry (char *path, char *buffer) {
+int get_config_entry(char *path, char *buffer) {
   struct uci_context *c;
   struct uci_ptr ptr;
      
@@ -11,6 +11,6 @@ int get_config_entry (char *path, char *buffer) {
   }
 
   strcpy(buffer, ptr.o->v.string);
-  uci_free_context (c);
+  uci_free_context(c);
   return 0;
 }

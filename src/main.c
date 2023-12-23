@@ -18,6 +18,8 @@
 #include "header/sqlitedb.h"
 
 #define MAX_BUFFER_LENGHT 150
+
+// int debug = 0;
        
 int main() {
 
@@ -30,8 +32,21 @@ int main() {
 
   int sqlite_ok = 0;
   
-  // printf("%s\n", sqlite3_libversion());
+  /*
+  char buffer_uci[80];
+  char debug_path[] = "comiot.config.debug";
+  char debug_value[256];
+  
+  memset(&buffer_uci, '\0', sizeof(buffer_uci));
+  get_config_entry(debug_path, buffer_uci);
+  sprintf(debug_value, "%s", buffer_uci);
+  debug = atoi(debug_value);
+  if (debug) { printf("%s: %s\n", debug_path, debug_value); }
+  memset(&buffer_uci, '\0', sizeof(buffer_uci));
+  */
 
+  // printf("uci read config\n");
+  
   init_comport_noblock();
   sockfd = influxdb_connect();
   entity_t entity;
@@ -58,6 +73,9 @@ int main() {
             // printf("topic: %s\n", entity.topic);
             // printf("value: %s\n", entity.value);
             influxdb_send_message(&entity, sockfd);
+            if (sqlite_ok) {
+              sqlitedb_write_message(&entity);
+            }
           } 
 					
           last_char_pos = 0;

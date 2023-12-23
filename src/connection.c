@@ -21,12 +21,10 @@ int influxdb_connect() {
   sprintf(db_ip, "%s", buffer);
   // printf("%s: %s\n", db_ip_path, db_ip);
   memset(&buffer, '\0', sizeof(buffer));
-  // bzero(&buffer, sizeof(buffer));
 
   get_config_entry(db_port_path, buffer);
   sprintf(db_port, "%s", buffer);
   // printf("%s: %s\n", db_port_path, db_port);
-  // bzero(&buffer, sizeof(buffer));
 
   /* static is zero filled on start up */
   // printf("Connecting from uci config file socket to %s and port %d\n", db_ip, atoi(db_port));
