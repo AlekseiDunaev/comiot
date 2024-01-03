@@ -27,10 +27,13 @@ int main() {
   char buf[MAX_BUFFER_LENGHT];
   char message[MAX_BUFFER_LENGHT];
   
+  entity_t entity;
+  
   int sockfd;
   int last_char_pos = 0;
 
   int sqlite_ok = 0;
+  int influx_ok = 0;
   
   /*
   char buffer_uci[80];
@@ -48,14 +51,14 @@ int main() {
   // printf("uci read config\n");
   
   init_comport_noblock();
-  sockfd = influxdb_connect();
-  entity_t entity;
-
-  memset(message, '\0', sizeof(message));
-
+  if ((sockfd = influxdb_connect()) >= 0) {
+    influx_ok = 1;
+  };
   if (!sqlitedb_test()) {
     sqlite_ok = 1;
   };
+  
+  memset(message, '\0', sizeof(message));
 
   while(true) {
 
@@ -72,11 +75,28 @@ int main() {
             // printf("id: %s\n", entity.id);
             // printf("topic: %s\n", entity.topic);
             // printf("value: %s\n", entity.value);
-            influxdb_send_message(&entity, sockfd);
+
             if (sqlite_ok) {
               sqlitedb_write_message(&entity);
             }
-          } 
+
+            if (!influx_ok) {
+              if ((sockfd = influxdb_connect()) < 0) {
+                printf("log Error influx connect\n");
+              } else {
+                influx_ok = 1;
+              }
+            }
+            
+            if (influx_ok) {
+              if (influxdb_send_message(&entity, sockfd) < 0) {
+                printf("log Error send influx message\n");
+              }
+            }
+
+          } else {
+            printf("log Error read entity\n");
+          }
 					
           last_char_pos = 0;
           memset(message, '\0', sizeof(message));

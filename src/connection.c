@@ -29,13 +29,21 @@ int influxdb_connect() {
   /* static is zero filled on start up */
   // printf("Connecting from uci config file socket to %s and port %d\n", db_ip, atoi(db_port));
 
-  if((sockfd = socket(AF_INET, SOCK_STREAM,0)) <0) pexit("socket() failed");
+  if((sockfd = socket(AF_INET, SOCK_STREAM,0)) < 0) {
+    printf("log socket() failed");
+    return -1;
+  }
+  // if((sockfd = socket(AF_INET, SOCK_STREAM,0)) <0) pexit("socket() failed");
   
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = inet_addr(db_ip);
   serv_addr.sin_port = htons(atoi(db_port));
   
-  if(connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) <0) pexit("connect() failed");
+  if(connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    printf("log connect() failed");
+    return -1;
+  }
+  // if(connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) <0) pexit("connect() failed");
   // printf("Connected socket to %s and port %d\n", db_ip, atoi(db_port));
 
   return sockfd;
@@ -59,23 +67,35 @@ int influxdb_send_message(entity_t* entity, int sockfd) {
   // printf("Send to InfluxDB the POST request bytes=%d \n->|%s|<-\n", strlen(header), header);
   ret = write(sockfd, header, strlen(header));
     
-  if (ret < 0) pexit("Write Header request to InfluxDB failed");
+  if (ret < 0) {
+    printf("log Write Header request to InfluxDB failed\n");
+    return ret;
+  }
+  // if (ret < 0) pexit("Write Header request to InfluxDB failed");
     
   // printf("Send to InfluxDB the data bytes=%d\n->|%s|<-\n",strlen(body),body);
   ret = write(sockfd, body, strlen(body));
     
-  if (ret < 0) pexit("Write Data Body to InfluxDB failed");
+  if (ret < 0) {
+    printf("log Write Data Body to InfluxDB failed");
+    return ret;
+  }
+  // if (ret < 0) pexit("Write Data Body to InfluxDB failed");
   /* Get back the acknwledgement from InfluxDB */
   /* It worked if you get "HTTP/1.1 204 No Content" and some other fluff */
 
   ret = read(sockfd, result, sizeof(result));
-  if (ret < 0) pexit("Reading the result from InfluxDB failed");
+  if (ret < 0) {
+    printf("log Reading the result from InfluxDB failed");
+    return ret;
+  }
+  // if (ret < 0) pexit("Reading the result from InfluxDB failed");
 
   result[ret] = 0; /* terminate string */
   // printf("Result returned from InfluxDB. Note:204 is Sucess\n->|%s|<-\n", result);
 
   // printf("\nIn function entity_get after entity activate\n\n");
 
-  return 1;
+  return ret;
 }
 
